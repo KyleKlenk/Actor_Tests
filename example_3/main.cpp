@@ -67,7 +67,6 @@ public:
 void caf_main(caf::actor_system& sys) {
     caf::scoped_actor self{sys};
     self->println("Hello, CAF!");
-    caf::cuda::manager::init(sys);
     auto test_actor = self->spawn(caf::actor_from_state<MatMult>);
     self->mail(2).send(test_actor);
     self->await_all_other_actors_done();
