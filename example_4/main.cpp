@@ -4,8 +4,6 @@
 
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
-#include <caf/cuda/middleman.hpp>
-#include <caf/cuda/actor_system_extension.hpp>
 #include "vector"
 
 // Define the command for matrix multiplication
@@ -29,7 +27,7 @@ public:
     caf::behavior make_behavior() {
       return {
         [this](int N) {
-          auto& mgr = self_->system().cuda();
+          auto& mgr = self_->system().cuda_manager();
 
           // Create the program from the CUBIN file
           auto program = mgr.create_program_from_cubin("matmul.cubin", "matrixMul");
@@ -73,4 +71,4 @@ void caf_main(caf::actor_system& sys) {
     self->await_all_other_actors_done();
 }
 
-CAF_MAIN(caf::cuda::middleman)
+CAF_MAIN(caf::cuda::manager)

@@ -15,9 +15,9 @@ LDFLAGS=-Wl,-rpath,/home/kklenk/.local/caf/lib \
 		 -Wl,-rpath,/opt/cuda/targets/x86_64-linux/lib
 NVCC_ARCH := sm_$(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
 
-.PHONY: all example_1 example_2 clean
+.PHONY: all example_1 example_2 example_3 example_4 example_5 clean
 
-all: example_1 example_2
+all: example_1 example_2 example_3 example_4 example_5
 
 example_1:
 	@echo "[NVCC] Building for $(NVCC_ARCH)"
@@ -28,6 +28,21 @@ example_2:
 	@echo "[NVCC] Building for $(NVCC_ARCH)"
 	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin ./example_2/matmul_kernel.cu -o matmul.cubin
 	$(CXX) -g ./example_2/main.cpp $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o bin_2
+
+example_3:
+	@echo "[NVCC] Building for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin ./example_3/matmul_kernel.cu -o matmul.cubin
+	$(CXX) -g ./example_3/main.cpp $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o bin_3
+
+example_4:
+	@echo "[NVCC] Building for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin ./example_4/matmul_kernel.cu -o matmul.cubin
+	$(CXX) -g ./example_4/main.cpp $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o bin_4
+
+example_5:
+	@echo "[NVCC] Building for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin ./example_5/matmul_kernel.cu -o matmul.cubin
+	$(CXX) -g ./example_5/main.cpp $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o bin_5	
 	
 
 clean:

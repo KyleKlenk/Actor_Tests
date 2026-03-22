@@ -27,10 +27,10 @@ public:
     caf::behavior make_behavior() {
       return {
         [this](int N) {
-          caf::cuda::manager& mgr = caf::cuda::manager::get();
 
           // Create the program from the CUBIN file
-          auto program = mgr.create_program_from_cubin("matmul.cubin", "matrixMul");
+          auto program = self_->system().cuda_manager()
+              .create_program_from_cubin("matmul.cubin", "matrixMul");
 
           int THREADS = 32;
           int BLOCKS = (N + THREADS - 1) / THREADS;
@@ -73,4 +73,4 @@ void caf_main(caf::actor_system& sys) {
     self->await_all_other_actors_done();
 }
 
-CAF_MAIN()
+CAF_MAIN(caf::cuda::manager)
