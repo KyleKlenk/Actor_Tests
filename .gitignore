@@ -1,0 +1,9 @@
+*main
+*matmul.cubin
+*.cubin
+
+*valgrind*
+
+archive/*
+*bin_1
+*bin_2
