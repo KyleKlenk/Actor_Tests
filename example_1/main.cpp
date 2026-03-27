@@ -29,7 +29,7 @@ class MatMult {
               BLOCKS, BLOCKS, 1, THREADS, THREADS, 1);
 
           auto gpuActor = self_->system().cuda_manager().spawnFromCUBIN(
-              "matmul.cubin", "matrixMul", dim,
+              "matmul_1.cubin", "matrixMul", dim,
               in<int>{}, in<int>{}, out<int>{}, in<int>{});
 
           self_->mail(
