@@ -17,7 +17,7 @@ NVCC_ARCH := sm_$(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader
 
 .PHONY: all clean
 
-all: bin_1 bin_2 bin_3 bin_4 bin_5
+all: bin_1 bin_2 bin_3 bin_4 bin_5 bin_6 bin_7
 
 matmul_1.cubin: ./example_1/matmul_kernel.cu
 	@echo "[NVCC] Building example_1 cubin for $(NVCC_ARCH)"
@@ -39,6 +39,18 @@ matmul_5.cubin: ./example_5/matmul_kernel.cu
 	@echo "[NVCC] Building example_5 cubin for $(NVCC_ARCH)"
 	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
 
+matmul_6.cubin: ./example_6/matmul_kernel.cu
+	@echo "[NVCC] Building example_6 cubin for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
+
+trivial_7.cubin: ./example_7/trivial_kernel.cu
+	@echo "[NVCC] Building example_7 trivial cubin for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
+
+matmul_7.cubin: ./example_7/matmul_kernel.cu
+	@echo "[NVCC] Building example_7 matmul cubin for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
+
 bin_1: ./example_1/main.cpp matmul_1.cubin
 	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
 
@@ -54,6 +66,13 @@ bin_4: ./example_4/main.cpp matmul_4.cubin
 bin_5: ./example_5/main.cpp matmul_5.cubin
 	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
 
+bin_6: ./example_6/main.cpp matmul_6.cubin
+	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
+
+bin_7: ./example_7/main.cpp trivial_7.cubin matmul_7.cubin
+	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
+
 clean:
 	rm -f matmul_1.cubin matmul_2.cubin matmul_3.cubin matmul_4.cubin matmul_5.cubin
-	rm -f bin_1 bin_2 bin_3 bin_4 bin_5
+	rm -f matmul_6.cubin trivial_7.cubin matmul_7.cubin
+	rm -f bin_1 bin_2 bin_3 bin_4 bin_5 bin_6 bin_7
