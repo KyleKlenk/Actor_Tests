@@ -17,7 +17,7 @@ NVCC_ARCH := sm_$(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader
 
 .PHONY: all clean
 
-all: bin_1 bin_2 bin_3 bin_4 bin_5 bin_6 bin_7 bin_8 bin_9 bin_10 bin_11
+all: bin_1 bin_2 bin_3 bin_4 bin_5 bin_6 bin_7 bin_8 bin_9 bin_10 bin_11 bin_12
 
 matmul_1.cubin: ./example_1/matmul_kernel.cu
 	@echo "[NVCC] Building example_1 cubin for $(NVCC_ARCH)"
@@ -67,6 +67,10 @@ delay_11.cubin: ./example_11/delay_kernel.cu
 	@echo "[NVCC] Building example_11 delay cubin for $(NVCC_ARCH)"
 	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
 
+delay_12.cubin: ./example_12/delay_kernel.cu
+	@echo "[NVCC] Building example_12 delay cubin for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
+
 bin_1: ./example_1/main.cpp matmul_1.cubin
 	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
 
@@ -100,7 +104,10 @@ bin_10: ./example_10/main.cpp delay_10.cubin
 bin_11: ./example_11/main.cpp delay_11.cubin
 	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
 
+bin_12: ./example_12/main.cpp delay_12.cubin
+	$(CXX) -g $< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $@
+
 clean:
 	rm -f matmul_1.cubin matmul_2.cubin matmul_3.cubin matmul_4.cubin matmul_5.cubin
-	rm -f matmul_6.cubin trivial_7.cubin matmul_7.cubin delay_8.cubin delay_9.cubin delay_10.cubin delay_11.cubin
-	rm -f bin_1 bin_2 bin_3 bin_4 bin_5 bin_6 bin_7 bin_8 bin_9 bin_10 bin_11
+	rm -f matmul_6.cubin trivial_7.cubin matmul_7.cubin delay_8.cubin delay_9.cubin delay_10.cubin delay_11.cubin delay_12.cubin
+	rm -f bin_1 bin_2 bin_3 bin_4 bin_5 bin_6 bin_7 bin_8 bin_9 bin_10 bin_11 bin_12
