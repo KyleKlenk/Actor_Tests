@@ -16,10 +16,11 @@ LDFLAGS=-Wl,-rpath,/home/kklenk/.local/caf/lib \
 NVCC_ARCH := sm_$(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
 
 BIN_DIR:=bin
-EXS:=1 2 3 4 5 6 7 8 9 10 11 12
+EXS:=1 2 3 4 5 6 7 8 9 10 11 12 13 14
 MATMUL_EXS:=1 2 3 4 5 6 7
-DELAY_EXS:=8 9 10 11 12
+DELAY_EXS:=8 9 10 11 12 13
 TRIVIAL_EXS:=7
+MONTE_CARLO_EXS:=14
 
 .PHONY: all clean
 
@@ -40,6 +41,10 @@ delay_%.cubin: ./example_%/delay_kernel.cu
 	@echo "[NVCC] Building example_$* delay cubin for $(NVCC_ARCH)"
 	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
 
+monte_carlo_%.cubin: ./example_%/monte_carlo_kernel.cu
+	@echo "[NVCC] Building example_$* monte_carlo cubin for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $(CUDA_INCLUDES) $< -o $@
+
 # small macro to generate bin targets (creates $(BIN_DIR) when needed)
 define BIN_RULE
 $(BIN_DIR)/bin_$1: ./example_$1/main.cpp $2
@@ -59,7 +64,9 @@ $(eval $(call BIN_RULE,9,delay_9.cubin))
 $(eval $(call BIN_RULE,10,delay_10.cubin))
 $(eval $(call BIN_RULE,11,delay_11.cubin))
 $(eval $(call BIN_RULE,12,delay_12.cubin))
+$(eval $(call BIN_RULE,13,delay_13.cubin))
+$(eval $(call BIN_RULE,14,monte_carlo_14.cubin))
 
 clean:
-	rm -f matmul_*.cubin trivial_7.cubin delay_*.cubin
+	rm -f matmul_*.cubin trivial_7.cubin delay_*.cubin monte_carlo_*.cubin
 	rm -rf $(BIN_DIR)
