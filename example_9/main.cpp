@@ -1,5 +1,6 @@
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 #include <vector>
 #include <iostream>
 #include <chrono>
@@ -28,7 +29,8 @@ public:
                 self_->println("Background tasks started. Now calling blocking run()...");
 
                 auto& mgr = self_->system().cuda_manager();
-                auto program = mgr.create_program_from_cubin("delay_9.cubin", "delayKernel");
+                auto program = mgr.create_program_from_cubin(
+                    actor_tests::paths::delay_cubin, "delayKernel");
 
                 caf::cuda::nd_range dim(1, 1, 1, 1, 1, 1);
 

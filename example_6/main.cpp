@@ -20,6 +20,7 @@
 
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 #include <vector>
 #include <chrono>
 
@@ -67,7 +68,7 @@ public:
                 // program loads kernels on all devices: one program_ptr
                 // works for any device_number argument below.
                 auto program = mgr.create_program_from_cubin(
-                    "matmul_6.cubin", "matrixMul");
+                    actor_tests::paths::matmul_quiet_cubin, "matrixMul");
 
                 int THREADS = 16;
                 int BLOCKS  = (N + THREADS - 1) / THREADS;

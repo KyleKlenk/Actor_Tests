@@ -4,6 +4,7 @@
 
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 #include "vector"
 
 class MatMult {
@@ -29,7 +30,7 @@ class MatMult {
               BLOCKS, BLOCKS, 1, THREADS, THREADS, 1);
 
           auto gpuActor = self_->system().cuda_manager().spawnFromCUBIN(
-              "matmul_1.cubin", "matrixMul", dim,
+              actor_tests::paths::matmul_verbose_cubin, "matrixMul", dim,
               in<int>{}, in<int>{}, out<int>{}, in<int>{});
 
           self_->mail(

@@ -1,5 +1,6 @@
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 #include <vector>
 #include <iostream>
 #include <chrono>
@@ -24,7 +25,7 @@ public:
                 caf::cuda::nd_range dim(1, 1, 1, 1, 1, 1);
 
                 auto gpuActor = self_->system().cuda_manager().spawnFromCUBIN(
-                    "delay_8.cubin", "delayKernel", dim,
+                    actor_tests::paths::delay_cubin, "delayKernel", dim,
                     in<int>{}, out<int>{});
 
                 self_->mail(caf::cuda::create_in_arg(delay_seconds), 

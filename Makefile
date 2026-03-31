@@ -13,60 +13,82 @@ INCLUDES=-I/home/kklenk/.local/caf/include \
 
 LDFLAGS=-Wl,-rpath,/home/kklenk/.local/caf/lib \
 		 -Wl,-rpath,/opt/cuda/targets/x86_64-linux/lib
-NVCC_ARCH := sm_$(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
+NVCC_ARCH ?= sm_$(shell nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
+
+ifeq ($(strip $(NVCC_ARCH)),sm_)
+$(error Unable to detect GPU compute capability. Run make with NVCC_ARCH=sm_XX, for example: make NVCC_ARCH=sm_86 example_1)
+endif
 
 BIN_DIR:=bin
+KERNEL_SRC_DIR:=kernels/src
+CUBIN_DIR:=kernels/cubin
+COMMON_HEADERS:=common/kernel_paths.hpp
+
 EXS:=1 2 3 4 5 6 7 8 9 10 11 12 13 14
-MATMUL_EXS:=1 2 3 4 5 6 7
-DELAY_EXS:=8 9 10 11 12 13
-TRIVIAL_EXS:=7
-MONTE_CARLO_EXS:=14
+EXAMPLE_TARGETS:=$(addprefix example_,$(EXS))
+LEGACY_BIN_TARGETS:=$(addprefix bin_,$(EXS))
 
-.PHONY: all clean
+MATMUL_VERBOSE_CUBIN:=$(CUBIN_DIR)/matmul_verbose.cubin
+MATMUL_QUIET_CUBIN:=$(CUBIN_DIR)/matmul_quiet.cubin
+TRIVIAL_CUBIN:=$(CUBIN_DIR)/trivial.cubin
+DELAY_CUBIN:=$(CUBIN_DIR)/delay.cubin
+MONTE_CARLO_CUBIN:=$(CUBIN_DIR)/monte_carlo.cubin
+ALL_CUBINS:=$(MATMUL_VERBOSE_CUBIN) $(MATMUL_QUIET_CUBIN) $(TRIVIAL_CUBIN) $(DELAY_CUBIN) $(MONTE_CARLO_CUBIN)
 
-BINS:=$(addprefix $(BIN_DIR)/bin_,$(EXS))
+.PHONY: all clean cubins $(EXAMPLE_TARGETS) $(LEGACY_BIN_TARGETS)
 
-all: $(BINS)
+all: $(EXAMPLE_TARGETS)
 
-# cubin pattern rules
-matmul_%.cubin: ./example_%/matmul_kernel.cu
-	@echo "[NVCC] Building example_$* matmul cubin for $(NVCC_ARCH)"
-	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
+cubins: $(ALL_CUBINS)
 
-trivial_%.cubin: ./example_%/trivial_kernel.cu
-	@echo "[NVCC] Building example_$* trivial cubin for $(NVCC_ARCH)"
-	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
+$(BIN_DIR) $(CUBIN_DIR):
+	@mkdir -p $@
 
-delay_%.cubin: ./example_%/delay_kernel.cu
-	@echo "[NVCC] Building example_$* delay cubin for $(NVCC_ARCH)"
-	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $< -o $@
-
-monte_carlo_%.cubin: ./example_%/monte_carlo_kernel.cu
-	@echo "[NVCC] Building example_$* monte_carlo cubin for $(NVCC_ARCH)"
+$(MATMUL_VERBOSE_CUBIN): $(KERNEL_SRC_DIR)/matmul_verbose.cu | $(CUBIN_DIR)
+	@echo "[NVCC] Building $@ for $(NVCC_ARCH)"
 	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $(CUDA_INCLUDES) $< -o $@
 
-# small macro to generate bin targets (creates $(BIN_DIR) when needed)
-define BIN_RULE
-$(BIN_DIR)/bin_$1: ./example_$1/main.cpp $2
-	@mkdir -p $(BIN_DIR)
+$(MATMUL_QUIET_CUBIN): $(KERNEL_SRC_DIR)/matmul_quiet.cu | $(CUBIN_DIR)
+	@echo "[NVCC] Building $@ for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $(CUDA_INCLUDES) $< -o $@
+
+$(TRIVIAL_CUBIN): $(KERNEL_SRC_DIR)/trivial.cu | $(CUBIN_DIR)
+	@echo "[NVCC] Building $@ for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $(CUDA_INCLUDES) $< -o $@
+
+$(DELAY_CUBIN): $(KERNEL_SRC_DIR)/delay.cu | $(CUBIN_DIR)
+	@echo "[NVCC] Building $@ for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $(CUDA_INCLUDES) $< -o $@
+
+$(MONTE_CARLO_CUBIN): $(KERNEL_SRC_DIR)/monte_carlo.cu | $(CUBIN_DIR)
+	@echo "[NVCC] Building $@ for $(NVCC_ARCH)"
+	$(NVCC) -g -arch=$(NVCC_ARCH) --cubin $(CUDA_INCLUDES) $< -o $@
+
+define EXAMPLE_RULE
+example_$1: $(BIN_DIR)/bin_$1
+
+bin_$1: $(BIN_DIR)/bin_$1
+
+$(BIN_DIR)/bin_$1: ./example_$1/main.cpp $(COMMON_HEADERS) $2 | $(BIN_DIR)
+	@echo "[CXX] Building $$@"
 	$(CXX) -g $$< $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(LIBS) -o $$@
 endef
 
-$(eval $(call BIN_RULE,1,matmul_1.cubin))
-$(eval $(call BIN_RULE,2,matmul_2.cubin))
-$(eval $(call BIN_RULE,3,matmul_3.cubin))
-$(eval $(call BIN_RULE,4,matmul_4.cubin))
-$(eval $(call BIN_RULE,5,matmul_5.cubin))
-$(eval $(call BIN_RULE,6,matmul_6.cubin))
-$(eval $(call BIN_RULE,7,matmul_7.cubin trivial_7.cubin))
-$(eval $(call BIN_RULE,8,delay_8.cubin))
-$(eval $(call BIN_RULE,9,delay_9.cubin))
-$(eval $(call BIN_RULE,10,delay_10.cubin))
-$(eval $(call BIN_RULE,11,delay_11.cubin))
-$(eval $(call BIN_RULE,12,delay_12.cubin))
-$(eval $(call BIN_RULE,13,delay_13.cubin))
-$(eval $(call BIN_RULE,14,monte_carlo_14.cubin))
+$(eval $(call EXAMPLE_RULE,1,$(MATMUL_VERBOSE_CUBIN)))
+$(eval $(call EXAMPLE_RULE,2,$(MATMUL_VERBOSE_CUBIN)))
+$(eval $(call EXAMPLE_RULE,3,$(MATMUL_VERBOSE_CUBIN)))
+$(eval $(call EXAMPLE_RULE,4,$(MATMUL_VERBOSE_CUBIN)))
+$(eval $(call EXAMPLE_RULE,5,$(MATMUL_VERBOSE_CUBIN)))
+$(eval $(call EXAMPLE_RULE,6,$(MATMUL_QUIET_CUBIN)))
+$(eval $(call EXAMPLE_RULE,7,$(MATMUL_QUIET_CUBIN) $(TRIVIAL_CUBIN)))
+$(eval $(call EXAMPLE_RULE,8,$(DELAY_CUBIN)))
+$(eval $(call EXAMPLE_RULE,9,$(DELAY_CUBIN)))
+$(eval $(call EXAMPLE_RULE,10,$(DELAY_CUBIN)))
+$(eval $(call EXAMPLE_RULE,11,$(DELAY_CUBIN)))
+$(eval $(call EXAMPLE_RULE,12,$(DELAY_CUBIN)))
+$(eval $(call EXAMPLE_RULE,13,$(DELAY_CUBIN)))
+$(eval $(call EXAMPLE_RULE,14,$(MONTE_CARLO_CUBIN)))
 
 clean:
-	rm -f matmul_*.cubin trivial_7.cubin delay_*.cubin monte_carlo_*.cubin
-	rm -rf $(BIN_DIR)
+	rm -f ./*.cubin
+	rm -rf $(BIN_DIR) $(CUBIN_DIR)

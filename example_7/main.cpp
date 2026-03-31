@@ -24,6 +24,7 @@
 
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -111,7 +112,7 @@ public:
                     nop_cmd runner;
 
                     auto prog = mgr.create_program_from_cubin(
-                        "trivial_7.cubin", "trivial_kernel");
+                        actor_tests::paths::trivial_cubin, "trivial_kernel");
                     caf::cuda::nd_range dim(1, 1, 1, 1, 1, 1);
 
                     std::vector<int> inp = {42};
@@ -157,7 +158,7 @@ public:
                     mmul_cmd runner;
 
                     auto prog = mgr.create_program_from_cubin(
-                        "matmul_7.cubin", "matrixMul");
+                        actor_tests::paths::matmul_quiet_cubin, "matrixMul");
 
                     const int sizes[] = {4, 32, 128, 512};
 

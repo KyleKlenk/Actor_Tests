@@ -1,3 +1,5 @@
+/bin/
+/kernels/cubin/
 *main
 *matmul.cubin
 *.cubin

@@ -1,6 +1,3 @@
-// Noiseless matrix multiplication kernel.
-// Shared with example_6 but compiled separately so each test is self-contained.
-
 #include <cuda.h>
 
 extern "C" __global__

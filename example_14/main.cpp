@@ -28,6 +28,7 @@
 #include <caf/all.hpp>
 #include <caf/actor_cast.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 
 #include <deque>
 #include <map>
@@ -108,7 +109,7 @@ public:
                 // All workers use device 0 on a single-GPU machine.
                 // On multi-GPU hardware, replace 0 with worker_index_.
                 auto program = mgr.create_program_from_cubin(
-                    "monte_carlo_14.cubin", "monteCarloKernel");
+                    actor_tests::paths::monte_carlo_cubin, "monteCarloKernel");
 
                 nd_range dims(/*grid*/64, 1, 1, /*block*/256, 1, 1);
 

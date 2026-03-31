@@ -4,6 +4,7 @@
 
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 #include "vector"
 
 // Define the command for matrix multiplication
@@ -30,7 +31,8 @@ public:
 
           // Create the program from the CUBIN file
           auto program = self_->system().cuda_manager()
-              .create_program_from_cubin("matmul.cubin", "matrixMul");
+              .create_program_from_cubin(actor_tests::paths::matmul_verbose_cubin,
+                           "matrixMul");
 
           int THREADS = 32;
           int BLOCKS = (N + THREADS - 1) / THREADS;

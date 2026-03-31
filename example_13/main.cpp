@@ -23,6 +23,7 @@
 
 #include <caf/all.hpp>
 #include <caf/cuda/all.hpp>
+#include "../common/kernel_paths.hpp"
 #include <vector>
 #include <iostream>
 #include <chrono>
@@ -95,7 +96,7 @@ public:
                 // internally.
                 actor gpu_actor =
                     self_->system().cuda_manager().spawnFromCUBIN(
-                        "delay_13.cubin", "delayKernel", dim,
+                        actor_tests::paths::delay_cubin, "delayKernel", dim,
                         in<int>{}, out<int>{});
 
                 // Send the typed kernel arguments.  The facade will return
